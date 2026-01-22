@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShaikGraphix - Premium Printing Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <div class="container">
+            <div class="brand-header">
+                <h1 class="brand-name">ShaikGraphix</h1>
+                <p class="tagline">Your ideas, our design from concept to print, all in one place.</p>
+            </div>
+            <div class="question-card">
+                <h2>What do you need today?</h2>
+                <div class="options-grid">
+                    <button class="option-btn" onclick="selectOption('stickers')">
+                        <span class="label">Stickers</span>
+                    </button>
+                    <button class="option-btn" onclick="selectOption('business-card')">
+                        <span class="label">Artboard/Artpaper Printing</span>
+                    </button>
+                </div>
+                <div class="website-link">
+                    <a href="https://shaikgraphix.com/" target="_blank" rel="noopener noreferrer">Check out our website</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stickers Flow -->
+    <div id="stickers-page" class="page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Calculate sticker quantities and pricing for your sheets</h1>
+                <p class="page-tagline">We bring your story to identity and turn clicks into clients</p>
+                <button class="back-btn" onclick="goBack()">← Back</button>
+            </div>
+            
+            <div class="two-panel-layout">
+                <!-- Left Panel: Sticker Details -->
+                <div class="panel left-panel">
+                    <h2 class="panel-title">Sticker Details</h2>
+                    
+                    <div class="form-group">
+                        <label>Sticker Dimensions Unit:</label>
+                        <div class="toggle-switch">
+                            <button class="toggle-btn active" id="toggle-mm" onclick="toggleUnit('mm')">mm</button>
+                            <button class="toggle-btn" id="toggle-inch" onclick="toggleUnit('inch')">inches</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="length">Sticker Length: <span class="unit-label" id="unit-label-length">mm</span></label>
+                        <input type="number" id="length" step="0.1" min="0.1" placeholder="Enter length" oninput="validateDimensions()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="width">Sticker Width: <span class="unit-label" id="unit-label-width">mm</span></label>
+                        <input type="number" id="width" step="0.1" min="0.1" placeholder="Enter width" oninput="validateDimensions()">
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Spacing:</span>
+                        <span class="info-value">2mm (fixed)</span>
+                    </div>
+                    
+                        <div class="form-group">
+                            <label for="quantity">Quantity Needed:</label>
+                            <input type="number" id="quantity" min="100" step="100" placeholder="Minimum 100" oninput="validateQuantityInput()">
+                            <span class="error-message" id="quantity-error"></span>
+                        </div>
+                    
+                    <div class="form-group">
+                        <label>Design File:</label>
+                        <div class="button-group">
+                            <button type="button" class="design-btn" id="btn-has-design" onclick="selectDesignOption(true)">I have a design file</button>
+                            <button type="button" class="design-btn" id="btn-no-design" onclick="selectDesignOption(false)">No design file</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Paper Format Selection -->
+                <div class="panel right-panel">
+                    <h2 class="panel-title">Paper Format Selection</h2>
+                    
+                    <div class="form-group">
+                        <label for="paper-format">Select Paper Format:</label>
+                        <select id="paper-format" class="paper-select" onchange="selectPaperFromDropdown()">
+                            <option value="">-- Select Paper Format --</option>
+                            <option value="art">17.5 x 11.5 - Artsticker - Rs 100/85</option>
+                            <option value="synthetic">17.5 x 11.5 - Synthetic - Rs 180/130</option>
+                            <option value="transparent">17.5 x 11.5 - Transparent - Rs 180/130</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-view-details" id="btn-view-details" onclick="toggleProductDetails()" style="display: none;">
+                        <span id="view-details-text">View Product Details</span>
+                        <span id="view-details-icon">▼</span>
+                    </button>
+                    
+                    <div id="product-details" class="product-details" style="display: none;">
+                        <p id="product-description"></p>
+                        <ul id="product-features"></ul>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lamination">Lamination:</label>
+                        <select id="lamination" class="paper-select" onchange="selectLaminationFromDropdown()">
+                            <option value="">-- Select Lamination --</option>
+                            <option value="matte">Matte Lamination</option>
+                            <option value="glossy">Glossy Lamination</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-view-details" id="btn-view-lamination-details" onclick="toggleLaminationDetails()" style="display: none;">
+                        <span id="view-lamination-details-text">View Product Details</span>
+                        <span id="view-lamination-details-icon">▼</span>
+                    </button>
+                    
+                    <div id="lamination-details" class="product-details" style="display: none;">
+                        <p id="lamination-description"></p>
+                    </div>
+                    
+                    <div id="pricing-info" class="pricing-info" style="display: none;">
+                        <h3>Pricing Information</h3>
+                        <div class="pricing-item">
+                            <span>First Sheet:</span>
+                            <strong id="price-first">-</strong>
+                        </div>
+                        <div class="pricing-item">
+                            <span>Additional Sheets:</span>
+                            <strong id="price-addon">-</strong>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-calculate" id="btn-calculate" onclick="calculatePrice()" style="display: none;">Calculate</button>
+                    
+                    <div id="layout-info-section" class="layout-section" style="display: none;">
+                        <h3>Layout Information</h3>
+                        <div class="info-row">
+                            <span>Stickers per sheet:</span>
+                            <span id="result-stickers-per-sheet">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Sheets needed:</span>
+                            <span id="result-sheets">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="cost-breakdown-section" class="cost-section" style="display: none;">
+                        <h3>Cost Breakdown</h3>
+                        <div class="info-row">
+                            <span>Sheets required:</span>
+                            <span id="cost-sheets">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Total cost:</span>
+                            <span id="cost-total">-</span>
+                        </div>
+                        <div class="info-row grand-total">
+                            <span>Grand total:</span>
+                            <span id="cost-grand-total">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="action-buttons" class="action-buttons" style="display: none;">
+                        <button class="btn-secondary" onclick="resetCalculation()">Reset</button>
+                        <button class="btn-primary" onclick="proceedToOrder()">Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artboard/Artpaper Printing Flow -->
+    <div id="business-card-page" class="page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Calculate artboard/artpaper printing quantities and pricing</h1>
+                <button class="back-btn" onclick="goBack()">← Back</button>
+            </div>
+            
+            <div class="two-panel-layout">
+                <!-- Left Panel: Artboard/Artpaper Details -->
+                <div class="panel left-panel">
+                    <h2 class="panel-title">Artboard/Artpaper Details</h2>
+                    
+                    <div class="form-group">
+                        <label>Card Dimensions Unit:</label>
+                        <div class="toggle-switch">
+                            <button class="toggle-btn active" id="bc-toggle-mm" onclick="toggleBCUnit('mm')">mm</button>
+                            <button class="toggle-btn" id="bc-toggle-inch" onclick="toggleBCUnit('inch')">inches</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bc-length">Card Length: <span class="unit-label" id="bc-unit-label-length">mm</span></label>
+                        <input type="number" id="bc-length" step="0.1" min="0.1" placeholder="Enter length" oninput="validateBCDimensions()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bc-width">Card Width: <span class="unit-label" id="bc-unit-label-width">mm</span></label>
+                        <input type="number" id="bc-width" step="0.1" min="0.1" placeholder="Enter width" oninput="validateBCDimensions()">
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Spacing:</span>
+                        <span class="info-value">2mm (fixed)</span>
+                    </div>
+                    
+                        <div class="form-group">
+                            <label for="bc-quantity">Quantity Needed:</label>
+                            <input type="number" id="bc-quantity" min="100" step="100" placeholder="Minimum 100" oninput="validateBCQuantityInput()">
+                            <span class="error-message" id="bc-quantity-error"></span>
+                        </div>
+                    
+                    <div class="form-group">
+                        <label>Design File:</label>
+                        <div class="button-group">
+                            <button type="button" class="design-btn" id="bc-btn-has-design" onclick="selectBCDesignOption(true)">I have a design file</button>
+                            <button type="button" class="design-btn" id="bc-btn-no-design" onclick="selectBCDesignOption(false)">No design file</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Print Side:</label>
+                        <div class="button-group">
+                            <button type="button" class="design-btn" id="bc-btn-single-side" onclick="selectBCPrintSide('single')">Single Side</button>
+                            <button type="button" class="design-btn" id="bc-btn-front-back" onclick="selectBCPrintSide('front-back')">Front & Back</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Paper Format Selection -->
+                <div class="panel right-panel">
+                    <h2 class="panel-title">Paper Format Selection</h2>
+                    
+                    <div class="form-group">
+                        <label for="bc-paper-format">Select Paper Format:</label>
+                        <select id="bc-paper-format" class="paper-select" onchange="selectBCPaperFromDropdown()">
+                            <option value="">-- Select Paper Format --</option>
+                            <option value="100gsm">100 GSM Art Paper - Rs 100/55</option>
+                            <option value="130gsm">130 GSM Art Paper - Rs 100/60</option>
+                            <option value="170gsm">170 GSM Art Paper - Rs 100/60</option>
+                            <option value="250gsm">250 GSM Art Board - Rs 130/80</option>
+                            <option value="300gsm">300 GSM Art Board - Rs 130/80</option>
+                            <option value="ivory">Ivory Board - Rs 150/100</option>
+                            <option value="linen">Linen Texture - Rs 150/105</option>
+                            <option value="linen-ivory">Linen Ivory - Rs 150/105</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-view-details" id="bc-btn-view-details" onclick="toggleBCProductDetails()" style="display: none;">
+                        <span id="bc-view-details-text">View Product Details</span>
+                        <span id="bc-view-details-icon">▼</span>
+                    </button>
+                    
+                    <div id="bc-product-details" class="product-details" style="display: none;">
+                        <p id="bc-product-description"></p>
+                        <ul id="bc-product-features"></ul>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bc-lamination">Lamination:</label>
+                        <select id="bc-lamination" class="paper-select" onchange="selectBCLaminationFromDropdown()">
+                            <option value="">-- Select Lamination --</option>
+                            <option value="none">None</option>
+                            <option value="matte">Matte Lamination</option>
+                            <option value="glossy">Glossy Lamination</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" class="btn-view-details" id="bc-btn-view-lamination-details" onclick="toggleBCLaminationDetails()" style="display: none;">
+                        <span id="bc-view-lamination-details-text">View Product Details</span>
+                        <span id="bc-view-lamination-details-icon">▼</span>
+                    </button>
+                    
+                    <div id="bc-lamination-details" class="product-details" style="display: none;">
+                        <p id="bc-lamination-description"></p>
+                    </div>
+                    
+                    <div id="bc-pricing-info" class="pricing-info" style="display: none;">
+                        <h3>Pricing Information</h3>
+                        <div class="pricing-item">
+                            <span>First Sheet:</span>
+                            <strong id="bc-price-first">-</strong>
+                        </div>
+                        <div class="pricing-item">
+                            <span>Additional Sheets:</span>
+                            <strong id="bc-price-addon">-</strong>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-calculate" id="bc-btn-calculate" onclick="calculateBCPrice()" style="display: none;">Calculate</button>
+                    
+                    <div id="bc-layout-info-section" class="layout-section" style="display: none;">
+                        <h3>Layout Information</h3>
+                        <div class="info-row">
+                            <span>Cards per sheet:</span>
+                            <span id="bc-result-cards-per-sheet">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Sheets needed:</span>
+                            <span id="bc-result-sheets">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="bc-cost-breakdown-section" class="cost-section" style="display: none;">
+                        <h3>Cost Breakdown</h3>
+                        <div class="info-row">
+                            <span>Sheets required:</span>
+                            <span id="bc-cost-sheets">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Price per sheet:</span>
+                            <span id="bc-cost-price-per-sheet">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Total cost:</span>
+                            <span id="bc-cost-total">-</span>
+                        </div>
+                        <div class="info-row grand-total">
+                            <span>Grand total:</span>
+                            <span id="bc-cost-grand-total">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="bc-action-buttons" class="action-buttons" style="display: none;">
+                        <button class="btn-secondary" onclick="resetBCCalculation()">Reset</button>
+                        <button class="btn-primary" onclick="proceedToBCOrder()">Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Form -->
+    <div id="order-page" class="page">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Client Details</h1>
+                <button class="back-btn" onclick="goBackToResults()">← Back</button>
+            </div>
+            <div class="order-form-layout">
+                <div class="order-summary-box">
+                    <h3>Order Summary</h3>
+                    <div id="order-summary-content"></div>
+                </div>
+                <div class="order-form-container">
+                    <form id="order-form" onsubmit="submitOrder(event)">
+                        <div class="form-group">
+                            <label for="customer-name">Name <span class="required">*</span></label>
+                            <input type="text" id="customer-name" required oninput="validateName()">
+                            <span class="error-message" id="name-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Phone <span class="required">*</span></label>
+                            <input type="tel" id="customer-phone" required oninput="validatePhone()">
+                            <span class="error-message" id="phone-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery-address">Delivery Address <span class="required">*</span></label>
+                            <textarea id="delivery-address" rows="3" required></textarea>
+                            <span class="error-message" id="address-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="gst-name">GST/Business Name (Optional)</label>
+                            <input type="text" id="gst-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="additional-notes">Additional Notes (Optional)</label>
+                            <textarea id="additional-notes" rows="3"></textarea>
+                        </div>
+                        <div class="payment-info">
+                            <h3>Payment Instructions</h3>
+                            <p><strong>Payment Method:</strong> GPay</p>
+                            <p><strong>Number:</strong> 9790282434</p>
+                            <p><strong>Name:</strong> SHAFEEKA</p>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="downloadOrderPDF()">Download Order Summary (PDF)</button>
+                            <button type="submit" class="btn-primary btn-large">Send Order via WhatsApp</button>
+                        </div>
+                    </form>
+                    <div id="success-message" class="success-message" style="display: none;">
+                        Order sent successfully on WhatsApp, We'll contact you shortly.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
